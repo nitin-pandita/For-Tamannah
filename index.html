@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>For You — From Nitin</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* =========================
+         DESIGN TOKENS & RESET
+      ========================= */
+      :root {
+        --ink: #2b2228;
+        --ink-soft: #4a3e46;
+        --muted: #82727b;
+        --paper: #fffaf8;
+        --paper-card: rgba(255, 255, 255, 0.72);
+        --rose: #d18290;
+        --rose-deep: #b35d6e;
+        --rose-soft: #faebed;
+        --rose-glow: rgba(209, 130, 144, 0.28);
+        --line: rgba(74, 62, 70, 0.1);
+        --shadow-soft: 0 18px 45px rgba(95, 60, 72, 0.07);
+        --shadow-elevate: 0 25px 60px rgba(95, 60, 72, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        color: var(--ink);
+        background:
+          radial-gradient(
+            ellipse at top left,
+            rgba(250, 235, 237, 0.8),
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at bottom right,
+            rgba(253, 241, 232, 0.75),
+            transparent 50%
+          ),
+          var(--paper);
+        font-family: "Plus Jakarta Sans", sans-serif;
+        overflow-x: hidden;
+        line-height: 1.7;
+        position: relative;
+      }
+
+      /* Subtle noise texture overlay */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: radial-gradient(
+          rgba(0, 0, 0, 0.02) 1px,
+          transparent 0
+        );
+        background-size: 24px 24px;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* =========================
+         OPENING CURTAIN
+      ========================= */
+      .opening {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at center, #ffffff, #f7eaec);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition:
+          opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
+          visibility 1.3s ease;
+      }
+
+      .opening.hide {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .opening-card {
+        text-align: center;
+        padding: 50px 40px;
+        border-radius: 36px;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 30px 80px rgba(180, 130, 140, 0.2);
+        max-width: 480px;
+        width: 90%;
+        animation: cardEntry 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+
+      .opening-tag {
+        font-size: 0.72rem;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: var(--rose-deep);
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+
+      .opening h1 {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(3.2rem, 9vw, 5.2rem);
+        font-weight: 500;
+        line-height: 0.95;
+        margin-bottom: 12px;
+      }
+
+      .opening h1 span {
+        font-family: "Alex Brush", cursive;
+        color: var(--rose);
+        display: block;
+        font-size: clamp(3.8rem, 11vw, 6rem);
+        margin-top: -6px;
+      }
+
+      .open-button {
+        position: relative;
+        margin-top: 35px;
+        padding: 16px 38px;
+        background: linear-gradient(135deg, #ffffff 0%, var(--rose-soft) 100%);
+        border: 1px solid rgba(209, 130, 144, 0.35);
+        border-radius: 999px;
+        color: var(--ink);
+        font-family: "Plus Jakarta Sans", sans-serif;
+        font-size: 0.92rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        box-shadow: 0 10px 30px var(--rose-glow);
+      }
+
+      .open-button:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 18px 45px rgba(209, 130, 144, 0.4);
+        background: #ffffff;
+      }
+
+      .open-button span {
+        color: var(--rose-deep);
+        margin-left: 6px;
+        display: inline-block;
+        transition: transform 0.3s ease;
+      }
+
+      .open-button:hover span {
+        transform: scale(1.25);
+      }
+
+      /* =========================
+         FLOATING CANVAS BACKGROUND
+      ========================= */
+      #ambientCanvas {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      /* =========================
+         MUSIC DOCK BUTTON
+      ========================= */
+      .music-button {
+        position: fixed;
+        right: 28px;
+        top: 28px;
+        height: 48px;
+        padding: 0 18px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        cursor: pointer;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Plus Jakarta Sans", sans-serif;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--ink-soft);
+        box-shadow: var(--shadow-soft);
+        transition: all 0.3s ease;
+      }
+
+      .music-button:hover {
+        transform: translateY(-2px);
+        background: #ffffff;
+      }
+
+      .eq-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 2px;
+        height: 14px;
+      }
+
+      .eq-bar {
+        width: 2.5px;
+        background: var(--rose);
+        border-radius: 2px;
+        height: 3px;
+        transition: height 0.2s ease;
+      }
+
+      .music-button.playing .eq-bar:nth-child(1) {
+        animation: eq 1s ease-in-out infinite alternate;
+      }
+      .music-button.playing .eq-bar:nth-child(2) {
+        animation: eq 0.8s ease-in-out 0.2s infinite alternate;
+      }
+      .music-button.playing .eq-bar:nth-child(3) {
+        animation: eq 1.2s ease-in-out 0.4s infinite alternate;
+      }
+
+      @keyframes eq {
+        from {
+          height: 3px;
+        }
+        to {
+          height: 14px;
+        }
+      }
+
+      /* =========================
+         LAYOUT & TYPOGRAPHY
+      ========================= */
+      .wrap {
+        width: min(1040px, 88%);
+        margin: auto;
+        position: relative;
+        z-index: 10;
+      }
+
+      section {
+        padding: 130px 0;
+      }
+
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.26em;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--rose-deep);
+        margin-bottom: 22px;
+      }
+
+      h1,
+      h2,
+      .quote {
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 500;
+      }
+
+      h1 {
+        font-size: clamp(3.8rem, 9vw, 7.5rem);
+        line-height: 0.9;
+        margin-bottom: 25px;
+      }
+
+      h1 span {
+        font-family: "Alex Brush", cursive;
+        color: var(--rose);
+        display: block;
+        font-size: clamp(4.4rem, 11vw, 8.5rem);
+        margin-top: 5px;
+      }
+
+      /* =========================
+         HERO SECTION
+      ========================= */
+      .hero {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        position: relative;
+      }
+
+      .intro {
+        max-width: 580px;
+        margin: 0 auto;
+        color: var(--muted);
+        font-size: 1.05rem;
+        line-height: 1.9;
+        font-weight: 300;
+      }
+
+      .scroll-indicator {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.68rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .scroll-mouse {
+        width: 22px;
+        height: 36px;
+        border: 1.5px solid rgba(130, 114, 123, 0.35);
+        border-radius: 12px;
+        position: relative;
+      }
+
+      .scroll-mouse::after {
+        content: "";
+        width: 3px;
+        height: 6px;
+        background: var(--rose);
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 2px;
+        animation: wheel 1.8s infinite;
+      }
+
+      @keyframes wheel {
+        0% {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, 14px);
+        }
+      }
+
+      /* =========================
+         LETTER
+      ========================= */
+      .letter-card {
+        max-width: 760px;
+        margin: auto;
+        padding: 70px 60px;
+        border-radius: 36px;
+        background: var(--paper-card);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: var(--shadow-soft);
+        text-align: center;
+      }
+
+      h2 {
+        font-size: clamp(2.5rem, 5.5vw, 4.2rem);
+        line-height: 1.05;
+        margin-bottom: 28px;
+        color: var(--ink);
+      }
+
+      .letter-card p {
+        color: var(--ink-soft);
+        font-size: 1.08rem;
+        line-height: 2;
+        margin: 20px 0;
+        font-weight: 300;
+      }
+
+      .signature-text {
+        margin-top: 40px !important;
+        font-family: "Alex Brush", cursive;
+        font-size: 2.8rem !important;
+        color: var(--rose-deep) !important;
+      }
+
+      /* =========================
+         PHOTO GALLERY (FIXED FIT)
+      ========================= */
+      .gallery-head {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 24px;
+        align-items: stretch;
+      }
+
+      .photo-stack {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        gap: 24px;
+      }
+
+      .photo {
+        border-radius: 28px;
+        overflow: hidden;
+        position: relative;
+        background: #f0e3e5;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: var(--shadow-soft);
+        transition:
+          transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+          box-shadow 0.5s ease;
+      }
+
+      .photo:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-elevate);
+      }
+
+      /* Master container heights */
+      .photo-large {
+        min-height: 560px;
+      }
+
+      .photo.small {
+        min-height: 268px;
+      }
+
+      /* The Image & Fit Rules */
+      .photo img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      /* Specific framing for photo 4 so portrait heads aren't cropped */
+      .photo.photo-portrait img {
+        object-position: center 20%;
+      }
+
+      .photo:hover img {
+        transform: scale(1.06);
+      }
+
+      /* Cinematic dark gradient bottom overlay */
+      .photo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          rgba(28, 18, 23, 0.88) 0%,
+          rgba(28, 18, 23, 0.45) 45%,
+          transparent 75%
+        );
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .placeholder {
+        position: absolute;
+        inset: auto 0 0 0;
+        padding: 32px 28px;
+        color: #ffffff;
+        z-index: 2;
+        text-align: left;
+      }
+
+      .placeholder strong {
+        display: block;
+        font-family: "Cormorant Garamond", serif;
+        font-size: 2.1rem;
+        font-weight: 500;
+        color: #ffffff;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
+
+      .placeholder p {
+        font-size: 0.92rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.88);
+        font-weight: 300;
+      }
+
+      .photo.small .placeholder {
+        padding: 22px 24px;
+      }
+
+      .photo.small .placeholder strong {
+        font-size: 1.65rem;
+      }
+
+      .photo.small .placeholder p {
+        font-size: 0.84rem;
+      }
+
+      /* =========================
+         PROMISE BANNER
+      ========================= */
+      .promise {
+        position: relative;
+      }
+
+      .promise-box {
+        text-align: center;
+        padding: 85px 40px;
+        border-radius: 40px;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.8) 0%,
+          rgba(250, 235, 237, 0.6) 100%
+        );
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(209, 130, 144, 0.25);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .quote {
+        font-size: clamp(2.2rem, 5vw, 3.8rem);
+        line-height: 1.2;
+        margin-bottom: 24px;
+        color: var(--ink);
+      }
+
+      .quote span {
+        color: var(--rose-deep);
+        font-style: italic;
+      }
+
+      .quiet {
+        max-width: 620px;
+        margin: auto;
+        color: var(--muted);
+        line-height: 1.95;
+        font-size: 1.02rem;
+        font-weight: 300;
+      }
+
+      /* =========================
+         ENDING
+      ========================= */
+      .ending {
+        text-align: center;
+        padding-bottom: 140px;
+      }
+
+      .ending h2 {
+        margin-bottom: 20px;
+      }
+
+      .heart-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--rose-soft);
+        color: var(--rose-deep);
+        font-size: 1.8rem;
+        margin-top: 36px;
+        box-shadow: 0 10px 30px var(--rose-glow);
+        animation: pulseSoft 2.5s infinite ease-in-out;
+      }
+
+      @keyframes pulseSoft {
+        0%,
+        100% {
+          transform: scale(1);
+          box-shadow: 0 10px 30px var(--rose-glow);
+        }
+        50% {
+          transform: scale(1.12);
+          box-shadow: 0 15px 40px rgba(209, 130, 144, 0.5);
+        }
+      }
+
+      /* =========================
+         FOOTER
+      ========================= */
+      footer {
+        text-align: center;
+        padding: 30px;
+        color: var(--muted);
+        font-size: 0.74rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        border-top: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.4);
+      }
+
+      /* =========================
+         SMOOTH SCROLL REVEALS
+      ========================= */
+      .reveal {
+        opacity: 0;
+        transform: translateY(40px);
+        transition:
+          opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform;
+      }
+
+      .reveal.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @keyframes cardEntry {
+        from {
+          opacity: 0;
+          transform: translateY(30px) scale(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      /* =========================
+         RESPONSIVE
+      ========================= */
+      @media (max-width: 820px) {
+        section {
+          padding: 85px 0;
+        }
+
+        .letter-card {
+          padding: 45px 25px;
+        }
+
+        .gallery {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .photo-large {
+          min-height: 480px;
+        }
+
+        .photo.small {
+          min-height: 380px;
+        }
+
+        .photo-stack {
+          grid-template-rows: auto auto;
+          gap: 20px;
+        }
+
+        .promise-box {
+          padding: 55px 24px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- AMBIENT PARTICLES CANVAS -->
+    <canvas id="ambientCanvas"></canvas>
+
+    <!-- =====================================
+         OPENING SCREEN
+    ====================================== -->
+    <div class="opening" id="opening">
+      <div class="opening-card">
+        <span class="opening-tag">A dedicated space</span>
+        <h1>For <span>Tamannah</span></h1>
+        <p style="color: var(--muted); font-size: 0.95rem; font-weight: 300">
+          Put your headphones on if you'd like...
+        </p>
+
+        <button class="open-button" onclick="openWebsite()">
+          Open this for me <span>♡</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- =====================================
+         BACKGROUND MUSIC & CONTROL
+    ====================================== -->
+    <audio id="music" loop preload="auto">
+      <source src="assets/her.mp3" type="audio/mpeg" />
+    </audio>
+
+    <button
+      class="music-button"
+      id="musicButton"
+      onclick="toggleMusic()"
+      aria-label="Toggle ambient soundtrack"
+    >
+      <div class="eq-bars">
+        <div class="eq-bar"></div>
+        <div class="eq-bar"></div>
+        <div class="eq-bar"></div>
+      </div>
+      <span id="musicStatusText">Play music</span>
+    </button>
+
+    <!-- =====================================
+         MAIN SITE CONTENT
+    ====================================== -->
+    <main>
+      <!-- HERO -->
+      <section class="hero">
+        <div class="wrap reveal">
+          <div class="eyebrow">A little something, from Nitin</div>
+          <h1>For <span>you, Tamannah</span></h1>
+          <p class="intro">
+            Not to ask for anything. Not to change anything. Just to leave a few
+            words here that I hope you remember on the days you need them.
+          </p>
+        </div>
+
+        <div class="scroll-indicator">
+          <span>Scroll down</span>
+          <div class="scroll-mouse"></div>
+        </div>
+      </section>
+
+      <!-- LETTER -->
+      <section>
+        <div class="wrap reveal">
+          <div class="letter-card">
+            <div class="eyebrow">If I could tell you one thing</div>
+            <h2>You don't have to carry everything alone.</h2>
+
+            <p>
+              I know you've been through things that made trusting people
+              difficult. I know some days can feel heavier than others, and
+              maybe letting someone get close isn't something you want right
+              now.
+            </p>
+
+            <p>
+              And that's okay. I don't want to rush you, convince you, or ask
+              you to give me something you're not ready to give.
+            </p>
+
+            <p>
+              I just want you to know that if one day you're feeling low, tired,
+              overwhelmed, or simply don't feel like talking to anyone — you can
+              remember that there is someone who genuinely wants you to be okay.
+            </p>
+
+            <p class="signature-text">— Nitin</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PHOTO GALLERY -->
+      <section>
+        <div class="wrap reveal">
+          <div class="gallery-head">
+            <div class="eyebrow">The little memories</div>
+            <h2>A few moments worth keeping.</h2>
+          </div>
+
+          <div class="gallery">
+            <!-- MAIN LARGE CARD -->
+            <div class="photo photo-large">
+              <img src="assets/photo-2.jpg" alt="Tamannah peaceful moment" />
+              <div class="placeholder">
+                <strong>How cute you look</strong>
+                <p>
+                  You look so incredibly cute when you sleep. I was just looking
+                  at you and thinking about how I could make you feel safe,
+                  comfortable, and at peace whenever you're with me. ♡
+                </p>
+              </div>
+            </div>
+
+            <!-- RIGHT STACK -->
+            <div class="photo-stack">
+              <!-- PHOTO 4 (FIXED FIT & PORTRAIT ORIENTATION) -->
+              <div class="photo small photo-portrait">
+                <img
+                  src="assets/photo-4.jpg"
+                  alt="Tamannah looking confident"
+                />
+                <div class="placeholder">
+                  <strong>Born to be a baddie</strong>
+                  <p>
+                    You're genuinely amazing, and I really hope you don't let
+                    what other people say ruin your mood. Don't forget how
+                    special you are.
+                  </p>
+                </div>
+              </div>
+
+              <!-- PHOTO 3 -->
+              <div class="photo small">
+                <img src="assets/photo-3.jpg" alt="Tamannah sunset moment" />
+                <div class="placeholder">
+                  <strong>This one is cute</strong>
+                  <p>
+                    Look how you are looking at the sunset, and how the sun is
+                    looking at you. I hope you always find moments like this. ♡
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROMISE -->
+      <section class="promise">
+        <div class="wrap reveal">
+          <div class="promise-box">
+            <div class="eyebrow">A promise, without expectations</div>
+            <p class="quote">
+              “You don't have to trust me.<br />
+              You don't have to give me anything.<br />
+              <span>Just remember — I'm here.</span>”
+            </p>
+            <p class="quiet">
+              No conditions. No pressure. No hidden expectation. If you want
+              company, I'll listen. If you want space, I'll respect it. And if
+              you ever need someone to remind you that you're not alone, I'll be
+              here.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ENDING -->
+      <section class="ending">
+        <div class="wrap reveal">
+          <div class="eyebrow">So, whenever you forget</div>
+          <h2>Remember this.</h2>
+          <p class="quiet">
+            Somewhere in this very big world, there is a Nitin who wants to see
+            you smile, wants you to be okay, and will be rooting for you —
+            without asking you to prove anything.
+          </p>
+          <div class="heart-mark">♡</div>
+        </div>
+      </section>
+    </main>
+
+    <footer>Made with a little courage &amp; a lot of care · Nitin</footer>
+
+    <!-- =====================================
+         SCRIPTS
+    ====================================== -->
+    <script>
+      const music = document.getElementById("music");
+      const opening = document.getElementById("opening");
+      const musicButton = document.getElementById("musicButton");
+      const musicStatusText = document.getElementById("musicStatusText");
+
+      /* Gentle volume fade-in */
+      function fadeInMusic() {
+        music.volume = 0;
+        const playPromise = music.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              musicButton.classList.add("playing");
+              musicStatusText.innerText = "Playing";
+              let vol = 0;
+              const timer = setInterval(() => {
+                vol += 0.05;
+                if (vol >= 0.35) {
+                  music.volume = 0.35;
+                  clearInterval(timer);
+                } else {
+                  music.volume = vol;
+                }
+              }, 100);
+            })
+            .catch(() => {
+              console.log("Autoplay restricted by browser.");
+              musicStatusText.innerText = "Play music";
+            });
+        }
+      }
+
+      function openWebsite() {
+        fadeInMusic();
+        opening.classList.add("hide");
+      }
+
+      function toggleMusic() {
+        if (music.paused) {
+          music.play();
+          music.volume = 0.35;
+          musicButton.classList.add("playing");
+          musicStatusText.innerText = "Playing";
+        } else {
+          music.pause();
+          musicButton.classList.remove("playing");
+          musicStatusText.innerText = "Paused";
+        }
+      }
+
+      /* Scroll Observer for reveals */
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("show");
+            }
+          });
+        },
+        { threshold: 0.12 },
+      );
+
+      document
+        .querySelectorAll(".reveal")
+        .forEach((el) => observer.observe(el));
+
+      /* Ambient floating petal / light dust particles */
+      const canvas = document.getElementById("ambientCanvas");
+      const ctx = canvas.getContext("2d");
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+
+      window.addEventListener("resize", () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      const particles = Array.from({ length: 24 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 2.8 + 1.2,
+        dx: (Math.random() - 0.5) * 0.4,
+        dy: -Math.random() * 0.45 - 0.2,
+        opacity: Math.random() * 0.45 + 0.15,
+      }));
+
+      function renderParticles() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach((p) => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(209, 130, 144, ${p.opacity})`;
+          ctx.fill();
+
+          p.x += p.dx;
+          p.y += p.dy;
+
+          if (p.y < -10) {
+            p.y = height + 10;
+            p.x = Math.random() * width;
+          }
+          if (p.x < -10) p.x = width + 10;
+          if (p.x > width + 10) p.x = -10;
+        });
+        requestAnimationFrame(renderParticles);
+      }
+      renderParticles();
+    </script>
+  </body>
+</html>
