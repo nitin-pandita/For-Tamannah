@@ -74,7 +74,54 @@
         }
       }
 
-      /* progress bar */
+      /* welcome screen + music button */
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        background: linear-gradient(135deg, #ffe3ec, #ffc2d6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          opacity 1s,
+          visibility 1s;
+        gap: 8px;
+        padding: 20px;
+      }
+      #splash.gone {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .sp-heart {
+        font-size: 5rem;
+        animation: beat 1.4s infinite;
+      }
+      #splash p {
+        font-size: 1.15rem;
+        animation: blink 1.6s infinite;
+      }
+      #splash small {
+        opacity: 0.7;
+      }
+      #mute {
+        position: fixed;
+        top: 14px;
+        right: 14px;
+        z-index: 90;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 0;
+        background: rgba(255, 255, 255, 0.85);
+        font-size: 1.3rem;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(232, 100, 139, 0.4);
+      }
+
       #bar {
         position: fixed;
         top: 0;
@@ -86,7 +133,6 @@
         border-radius: 0 5px 5px 0;
       }
 
-      /* hero */
       .hero {
         min-height: 100vh;
         display: flex;
@@ -215,7 +261,6 @@
         box-shadow: 0 16px 40px rgba(232, 100, 139, 0.3);
       }
 
-      /* gallery */
       .gallery {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -229,15 +274,13 @@
         box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
         transition: 0.4s;
         cursor: pointer;
+        transform: rotate(var(--r));
       }
       .gallery figure:nth-child(odd) {
         --r: -2.5deg;
       }
       .gallery figure:nth-child(even) {
         --r: 2.5deg;
-      }
-      .gallery figure {
-        transform: rotate(var(--r));
       }
       .gallery figure:hover {
         transform: scale(1.1) rotate(0);
@@ -280,7 +323,6 @@
         }
       }
 
-      /* reasons */
       .reasons {
         display: grid;
         gap: 14px;
@@ -317,7 +359,6 @@
         color: var(--rose);
       }
 
-      /* envelope */
       .env {
         width: 260px;
         height: 170px;
@@ -403,7 +444,6 @@
         font-size: 2.6rem;
       }
 
-      /* effects */
       .fx {
         position: fixed;
         pointer-events: none;
@@ -451,6 +491,18 @@
     </style>
   </head>
   <body>
+    <audio id="song" src="./assets/her.mp3" loop preload="auto"></audio>
+
+    <div id="splash" onclick="enter()">
+      <div class="sp-heart">💌</div>
+      <h1 class="shine" style="font-size: 2.4rem">For Prerna</h1>
+      <p>Tap anywhere to open 🎶</p>
+      <small>(turn your volume up a little)</small>
+    </div>
+    <button id="mute" onclick="toggleSong(event)" title="Music on/off">
+      🔊
+    </button>
+
     <div id="bar"></div>
     <div id="lb" onclick="this.style.display = 'none'">
       <img id="lbimg" alt="" />
@@ -459,7 +511,7 @@
     <section class="hero">
       <div class="photo-wrap">
         <img
-          src="photo1.jpg"
+          src="./assets/photo-1.jpg"
           alt="Prerna"
           onerror="this.style.display = 'none'"
         />
@@ -491,7 +543,7 @@
           <img
             src="./assets/photo-1.jpg"
             alt=""
-            onerror="this.alt = 'add photo1.jpg'"
+            onerror="this.alt = 'add assets/photo-1.jpg'"
           />
           <figcaption>Golden hour glow ☀️</figcaption>
         </figure>
@@ -499,7 +551,7 @@
           <img
             src="./assets/photo-2.jpg"
             alt=""
-            onerror="this.alt = 'add photo3.jpg'"
+            onerror="this.alt = 'add assets/photo-2.jpg'"
           />
           <figcaption>That happy laugh 😊</figcaption>
         </figure>
@@ -507,7 +559,7 @@
           <img
             src="./assets/photo-3.jpg"
             alt=""
-            onerror="this.alt = 'add photo4.jpg'"
+            onerror="this.alt = 'add assets/photo-3.jpg'"
           />
           <figcaption>Pretty in pink 🎀</figcaption>
         </figure>
@@ -515,7 +567,7 @@
           <img
             src="./assets/photo-4.jpg"
             alt=""
-            onerror="this.alt = 'add photo5.jpg'"
+            onerror="this.alt = 'add assets/photo-4.jpg'"
           />
           <figcaption>Cutest smile ever</figcaption>
         </figure>
@@ -523,7 +575,7 @@
           <img
             src="./assets/photo-5.jpg"
             alt=""
-            onerror="this.alt = 'add photo7.jpg'"
+            onerror="this.alt = 'add assets/photo-5.jpg'"
           />
           <figcaption>Mountain views, better you ⛰️</figcaption>
         </figure>
@@ -531,7 +583,7 @@
           <img
             src="./assets/photo-6.jpg"
             alt=""
-            onerror="this.alt = 'add photo8.jpg'"
+            onerror="this.alt = 'add assets/photo-6.jpg'"
           />
           <figcaption>Pure sunshine 🌼</figcaption>
         </figure>
@@ -637,19 +689,60 @@
           burst(35);
         }, 700);
       }
-      /* typewriter */
+
+      /* music: browsers only allow sound after a tap, so the welcome screen starts it */
+      const song = $("#song");
+      let entered = false;
+      function enter() {
+        if (entered) return;
+        entered = true;
+        $("#splash").classList.add("gone");
+        song.volume = 0;
+        const p = song.play();
+        if (p)
+          p.catch(() => {
+            $("#mute").textContent = "🔇";
+          });
+        let v = 0;
+        const f = setInterval(() => {
+          v = Math.min(v + 0.05, 0.8);
+          song.volume = v;
+          if (v >= 0.8) clearInterval(f);
+        }, 200);
+        burst(30);
+        startTyping();
+      }
+      function toggleSong(e) {
+        e.stopPropagation();
+        if (song.paused) {
+          song.play();
+          $("#mute").textContent = "🔊";
+        } else {
+          song.pause();
+          $("#mute").textContent = "🔇";
+        }
+      }
+      /* pause music if the tab is hidden, resume when she comes back */
+      document.addEventListener("visibilitychange", () => {
+        if (!entered || $("#mute").textContent === "🔇") return;
+        document.hidden ? song.pause() : song.play().catch(() => {});
+      });
+
+      /* typewriter (starts after the welcome tap) */
       const msg =
         "I made this little corner of the internet just for you, because you deserve something made with real thought. 💕";
       let i = 0;
-      const t = $("#type");
-      t.innerHTML = '<span id="tx"></span><span class="cursor">&nbsp;</span>';
-      (function type() {
-        if (i <= msg.length) {
-          $("#tx").textContent = msg.slice(0, i++);
-          setTimeout(type, 45);
-        }
-      })();
-      /* falling petals */
+      $("#type").innerHTML =
+        '<span id="tx"></span><span class="cursor">&nbsp;</span>';
+      function startTyping() {
+        (function type() {
+          if (i <= msg.length) {
+            $("#tx").textContent = msg.slice(0, i++);
+            setTimeout(type, 45);
+          }
+        })();
+      }
+
       setInterval(
         () =>
           fx(
@@ -662,7 +755,6 @@
           ),
         900,
       );
-      /* sparkle trail */
       function trail(x, y) {
         fx("spark", "✨", x, y, 0.8, 14);
       }
@@ -688,14 +780,12 @@
             18,
           );
       });
-      /* lightbox */
       document.querySelectorAll(".gallery img").forEach((im) =>
         im.addEventListener("click", () => {
           $("#lbimg").src = im.src;
           $("#lb").style.display = "flex";
         }),
       );
-      /* progress + reveal */
       addEventListener("scroll", () => {
         $("#bar").style.width =
           (scrollY / (document.body.scrollHeight - innerHeight)) * 100 + "%";
